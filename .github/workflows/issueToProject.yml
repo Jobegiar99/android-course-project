@@ -1,0 +1,27 @@
+name: Auto Assign to Project(s)
+
+on:
+  issues:
+    types: [labeled, edited]
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+jobs:        
+  assign_one_project:
+    runs-on: ubuntu-latest
+    name: Assign to Front-End
+    steps:
+    - name: Assign issues with `frontend` label to Front-End Project
+      uses: srggrs/assign-one-project-github-action@1.2.1
+      if: |
+        contains(github.event.issue.labels.*.name, 'frontend') ||
+        contains(github.event.pull_request.labels.*.name, 'frontend')
+      with:
+        project: 'https://github.com/Jobegiar99/android-course-project/projects/1'
+        column_name: "To Do"
+    - name: Notify Front End issue on discord server
+      if: |
+        contains(github.event.issue.labels.*.name, 'frontend') ||
+        contains(github.event.pull_request.labels.*.name, 'frontend')
+      run: |
+       curl -s -X POST "${{ secrets.DISCORD_FE }}" -d "content=Hey! There is a new Front-End Issue: ${{github.event.issue.title}} 🎨! Check it at the FE Project! https://github.com/Jobegiar99/android-course-project/projects/1"
